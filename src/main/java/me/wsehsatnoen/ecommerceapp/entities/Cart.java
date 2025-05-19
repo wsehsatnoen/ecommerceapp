@@ -11,7 +11,7 @@ public class Cart {
     private BigDecimal package_price;
     private int party_size;
     private enum StatusType {
-        PENDING, ORDERED, CANCELLED
+        pending, ordered, canceled
     }
     private StatusType status;
     private Date create_date;
