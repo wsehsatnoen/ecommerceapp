@@ -22,6 +22,7 @@ public class CartItem {
     @Column ( name = "cart_item_id" )
     private Long id;
 
+    /// Unidirectional relationship, no need for Join column/Mapped by declarations
     @ManyToOne
     private Vacation vacation;
 
@@ -32,6 +33,7 @@ public class CartItem {
     private Set<Excursion> excursions;
 
     @ManyToOne
+    @JoinColumn ( name = "cart_id" )
     private Cart cart;
 
     @CreationTimestamp

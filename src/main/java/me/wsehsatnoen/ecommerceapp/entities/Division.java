@@ -35,9 +35,11 @@ public class Division {
     @ManyToOne
     @JoinColumn ( name = "country_id", insertable = false, updatable = false )
     private Country country;
+
+    @Column ( name = "country_id" )
     private Long country_id;
 
-    @OneToMany
+    @OneToMany ( mappedBy = "division" )
     private Set<Customer> customers;
 
 }

@@ -46,8 +46,9 @@ public class Customer {
     private Date last_update;
 
     @ManyToOne
+    @JoinColumn ( name = "division_id" )
     private Division division;
 
-    @OneToMany
+    @OneToMany ( mappedBy = "customer" )
     private Set<Cart> carts;
 }

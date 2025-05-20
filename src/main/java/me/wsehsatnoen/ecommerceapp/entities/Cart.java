@@ -31,11 +31,8 @@ public class Cart {
     @Column ( name = "party_size" )
     private int party_size;
 
-    public enum StatusType {
-        pending, ordered, canceled
-    }
-
     @Column ( name = "status" )
+    @Enumerated ( EnumType.STRING )
     private StatusType status;
 
     @CreationTimestamp
@@ -47,9 +44,10 @@ public class Cart {
     private Date last_update;
 
     @ManyToOne
+    @JoinColumn ( name = "customer_id" )
     private Customer customer;
 
-    @OneToMany
+    @OneToMany ( mappedBy = "cart" )
     private Set<CartItem> cartItems;
 
 }

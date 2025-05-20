@@ -32,6 +32,6 @@ public class Country {
     @Column ( name = "last_update" )
     private Date last_update;
 
-    @OneToMany
+    @OneToMany ( mappedBy = "country_id" )
     private Set<Division> divisions;
 }
