@@ -42,7 +42,7 @@ public class Vacation {
     @Column ( name = "last_update" )
     private Date last_update;
 
-    @OneToMany
+    @OneToMany ( mappedBy = "vacation" )
     private Set<Excursion> excursions;
 
 }

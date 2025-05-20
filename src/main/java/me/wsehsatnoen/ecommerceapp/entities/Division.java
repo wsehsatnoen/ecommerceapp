@@ -32,13 +32,12 @@ public class Division {
     @Column ( name = "last_update" )
     private Date last_update;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn ( name = "country_id", nullable = false, insertable = false, updatable = false )
+    @ManyToOne
+    @JoinColumn ( name = "country_id", insertable = false, updatable = false )
     private Country country;
-
-    @Column ( name = "country_id" )
     private Long country_id;
 
     @OneToMany
     private Set<Customer> customers;
+
 }
