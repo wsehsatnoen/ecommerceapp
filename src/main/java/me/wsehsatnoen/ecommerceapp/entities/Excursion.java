@@ -39,8 +39,10 @@ public class Excursion {
     @Column ( name = "last_update" )
     private Date last_update;
 
-    //todo add relationships
+    @ManyToOne
     private Vacation vacation;
+
+    //todo look at udemy course on how to do this properly
     private Set<CartItem> cart_items;
 
 }

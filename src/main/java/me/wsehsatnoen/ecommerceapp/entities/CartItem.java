@@ -22,11 +22,13 @@ public class CartItem {
     @Column ( name = "cart_item_id" )
     private Long id;
 
-
+    @ManyToOne
     private Vacation vacation;
+
+    //todo look at Udemy course 5 on how to do this one properly
     private Set<Excursion> excursions;
 
-
+    @ManyToOne
     private Cart cart;
 
     @CreationTimestamp

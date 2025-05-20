@@ -32,6 +32,6 @@ public class Country {
     @Column ( name = "last_update" )
     private Date last_update;
 
-    //todo needs relationship
+    @OneToMany
     private Set<Division> divisions;
 }

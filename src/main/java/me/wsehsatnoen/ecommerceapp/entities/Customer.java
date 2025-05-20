@@ -45,7 +45,9 @@ public class Customer {
     @Column ( name = "last_update" )
     private Date last_update;
 
-    //todo set relationships
+    @ManyToOne
     private Division division;
+
+    @OneToMany
     private Set<Cart> carts;
 }

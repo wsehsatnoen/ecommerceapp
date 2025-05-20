@@ -46,8 +46,10 @@ public class Cart {
     @Column ( name = "last_update" )
     private Date last_update;
 
-    //todo add relationships
+    @ManyToOne
     private Customer customer;
+
+    @OneToMany
     private Set<CartItem> cartItems;
 
 }

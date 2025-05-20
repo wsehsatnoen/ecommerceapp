@@ -42,7 +42,8 @@ public class Vacation {
     @Column ( name = "last_update" )
     private Date last_update;
 
-    //todo add relationship
+
+    @OneToMany
     private Set<Excursion> excursions;
 
 }
