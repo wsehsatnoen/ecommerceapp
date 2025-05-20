@@ -42,7 +42,6 @@ public class Vacation {
     @Column ( name = "last_update" )
     private Date last_update;
 
-
     @OneToMany
     private Set<Excursion> excursions;
 
