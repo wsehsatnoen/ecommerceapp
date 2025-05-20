@@ -38,7 +38,7 @@ public class Customer {
     private String phone;
 
     @CreationTimestamp
-    @Column ( name = "create_date" )
+    @Column ( name = "create_date", updatable = false )
     private Date create_date;
 
     @UpdateTimestamp

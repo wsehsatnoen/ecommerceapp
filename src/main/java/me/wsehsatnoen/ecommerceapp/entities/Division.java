@@ -25,7 +25,7 @@ public class Division {
     private String division_name;
 
     @CreationTimestamp
-    @Column ( name = "create_date" )
+    @Column ( name = "create_date", updatable = false )
     private Date create_date;
 
     @UpdateTimestamp

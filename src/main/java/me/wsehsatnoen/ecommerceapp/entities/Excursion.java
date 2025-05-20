@@ -32,7 +32,7 @@ public class Excursion {
     private String image_URL;
 
     @CreationTimestamp
-    @Column ( name = "create_date" )
+    @Column ( name = "create_date", updatable = false )
     private Date created_date;
 
     @UpdateTimestamp
@@ -42,7 +42,10 @@ public class Excursion {
     @ManyToOne
     private Vacation vacation;
 
-    //todo look at udemy course on how to do this properly
+    @ManyToMany
+    @JoinTable ( name = "excursion_cartitem",
+        joinColumns = @JoinColumn ( name = "excursion_id" ),
+        inverseJoinColumns = @JoinColumn ( name = "cart_item_id" ))
     private Set<CartItem> cart_items;
 
 }

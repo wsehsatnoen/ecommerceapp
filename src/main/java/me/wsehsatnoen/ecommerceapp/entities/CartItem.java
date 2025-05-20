@@ -25,14 +25,17 @@ public class CartItem {
     @ManyToOne
     private Vacation vacation;
 
-    //todo look at Udemy course 5 on how to do this one properly
+    @ManyToMany
+    @JoinTable ( name = "excursion_cartitem",
+        joinColumns = @JoinColumn ( name = "cart_item_id" ),
+        inverseJoinColumns = @JoinColumn ( name = "excursion_id" ))
     private Set<Excursion> excursions;
 
     @ManyToOne
     private Cart cart;
 
     @CreationTimestamp
-    @Column ( name = "create_date" )
+    @Column ( name = "create_date", updatable = false )
     private Date create_date;
 
     @UpdateTimestamp
