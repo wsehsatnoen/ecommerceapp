@@ -1,7 +1,9 @@
 package me.wsehsatnoen.ecommerceapp.entities;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -14,6 +16,8 @@ import java.util.Set;
 @Getter
 @Setter
 @Table( name = "countries" )
+@AllArgsConstructor
+@NoArgsConstructor
 public class Country {
 
     @Id
