@@ -21,6 +21,7 @@ public class CheckoutController {
     public PurchaseResponse purchase(@RequestBody PurchaseData purchaseData) {
 
         return checkoutServices.checkout(purchaseData);
+
     }
 
 }

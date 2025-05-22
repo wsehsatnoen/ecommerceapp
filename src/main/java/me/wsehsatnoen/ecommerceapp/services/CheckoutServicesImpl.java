@@ -30,6 +30,7 @@ public class CheckoutServicesImpl implements CheckoutServices {
 
         // retrieve data from customerRepo
         Cart cart = purchaseData.getCart();
+        cart.setId(null); // Angular front end is sending an id of 0 and need the database to assign it.
 
         // generate tracking number
         String orderTrackingNumber = generateOrderTrackingNumber();

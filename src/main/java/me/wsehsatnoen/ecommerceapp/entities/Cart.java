@@ -21,8 +21,7 @@ public class Cart {
     @Id
     @GeneratedValue( strategy = GenerationType.IDENTITY )
     @Column ( name = "cart_id" )
-    private int id; // When running the server, it appears that when the setId is not converting the cart id number from
-                     // from typescript to long in java, once I changed it to int, it works seamlessly
+    private Long id;
 
     @Column ( name = "order_tracking_number" )
     private String orderTrackingNumber;
