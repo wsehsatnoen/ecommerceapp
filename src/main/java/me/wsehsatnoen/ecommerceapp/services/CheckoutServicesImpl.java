@@ -1,10 +1,12 @@
 package me.wsehsatnoen.ecommerceapp.services;
 
 import jakarta.transaction.Transactional;
+import me.wsehsatnoen.ecommerceapp.dao.CartRepository;
 import me.wsehsatnoen.ecommerceapp.dao.CustomerRepository;
 import me.wsehsatnoen.ecommerceapp.entities.Cart;
 import me.wsehsatnoen.ecommerceapp.entities.CartItem;
 import me.wsehsatnoen.ecommerceapp.entities.Customer;
+import me.wsehsatnoen.ecommerceapp.entities.StatusType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -14,11 +16,13 @@ import java.util.UUID;
 @Service
 public class CheckoutServicesImpl implements CheckoutServices {
 
+    private final CartRepository cartRepository;
     private CustomerRepository customerRepository;
 
     @Autowired
-    public CheckoutServicesImpl(CustomerRepository customerRepository) {
+    public CheckoutServicesImpl(CustomerRepository customerRepository, CartRepository cartRepository) {
         this.customerRepository = customerRepository;
+        this.cartRepository = cartRepository;
     }
 
     @Override
@@ -44,6 +48,7 @@ public class CheckoutServicesImpl implements CheckoutServices {
         customerRepository.save(customer);
 
         // return response
+        cart.setStatus(StatusType.ordered);
         return new PurchaseResponse(orderTrackingNumber);
     }
 

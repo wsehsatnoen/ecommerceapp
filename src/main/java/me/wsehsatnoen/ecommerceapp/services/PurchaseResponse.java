@@ -1,8 +1,12 @@
 package me.wsehsatnoen.ecommerceapp.services;
 
-import lombok.Data;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
+@AllArgsConstructor
 public class PurchaseResponse {
 
     private final String orderTrackingNumber;

@@ -10,6 +10,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Set;
 
 
@@ -57,6 +58,13 @@ public class Customer {
     private Set<Cart> carts;
 
     public void add(Cart cart) {
-        carts.add(cart);
+        if (cart != null) {
+            if (carts == null) {
+                carts = new HashSet<>();
+            }
+            carts.add(cart);
+            cart.setCustomer(this);
+        }
+
     }
 }
