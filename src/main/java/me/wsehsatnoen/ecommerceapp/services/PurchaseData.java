@@ -1,6 +1,5 @@
 package me.wsehsatnoen.ecommerceapp.services;
 
-import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import me.wsehsatnoen.ecommerceapp.entities.Cart;

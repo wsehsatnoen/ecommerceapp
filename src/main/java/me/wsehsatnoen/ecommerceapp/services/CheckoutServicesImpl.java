@@ -7,7 +7,6 @@ import me.wsehsatnoen.ecommerceapp.entities.Cart;
 import me.wsehsatnoen.ecommerceapp.entities.CartItem;
 import me.wsehsatnoen.ecommerceapp.entities.Customer;
 import me.wsehsatnoen.ecommerceapp.entities.StatusType;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Set;

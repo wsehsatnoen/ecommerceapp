@@ -3,11 +3,8 @@ package me.wsehsatnoen.ecommerceapp.bootstrap;
 import me.wsehsatnoen.ecommerceapp.dao.CustomerRepository;
 import me.wsehsatnoen.ecommerceapp.dao.DivisionRepository;
 import me.wsehsatnoen.ecommerceapp.entities.Customer;
-import me.wsehsatnoen.ecommerceapp.entities.Division;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
 
 @Component
 public class BootStrapData implements CommandLineRunner {
