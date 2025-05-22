@@ -36,14 +36,17 @@ public class CheckoutServicesImpl implements CheckoutServices {
         cart.setOrderTrackingNumber(orderTrackingNumber);
 
         // populate order with cartItems
+        // todo create the functionality for cart items to save in database
         Set<CartItem> cartItems = purchaseData.getCartItems();
-        cartItems.forEach(cart::add);
+        cartItems.forEach(cartItem -> {
+            cart.add(cartItem);
+        });
 
         // populate customer with cart
         Customer customer = purchaseData.getCustomer();
         customer.add(cart);
 
-        // save to database
+        // save to the database
         customerRepository.save(customer);
         cart.setStatus(StatusType.ordered);
         cartRepository.save(cart);
