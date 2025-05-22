@@ -17,9 +17,8 @@ import java.util.UUID;
 public class CheckoutServicesImpl implements CheckoutServices {
 
     private final CartRepository cartRepository;
-    private CustomerRepository customerRepository;
+    private final CustomerRepository customerRepository;
 
-    @Autowired
     public CheckoutServicesImpl(CustomerRepository customerRepository, CartRepository cartRepository) {
         this.customerRepository = customerRepository;
         this.cartRepository = cartRepository;
@@ -46,9 +45,10 @@ public class CheckoutServicesImpl implements CheckoutServices {
 
         // save to database
         customerRepository.save(customer);
+        cart.setStatus(StatusType.ordered);
+        cartRepository.save(cart);
 
         // return response
-        cart.setStatus(StatusType.ordered);
         return new PurchaseResponse(orderTrackingNumber);
     }
 

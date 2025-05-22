@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-import org.springframework.stereotype.Component;
+
 
 import java.util.Date;
 import java.util.HashSet;
@@ -51,7 +51,7 @@ public class Customer {
     private Date last_update;
 
     @ManyToOne
-    @JoinColumn ( name = "division_id", nullable = false )
+    @JoinColumn ( name = "division_id" )
     private Division division;
 
     @OneToMany ( mappedBy = "customer" )
@@ -65,6 +65,14 @@ public class Customer {
             carts.add(cart);
             cart.setCustomer(this);
         }
+    }
 
+    public Customer(String firstName, String lastName, String address, String postal_code, String phone, Division division) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.address = address;
+        this.postal_code = postal_code;
+        this.phone = phone;
+        this.division = division;
     }
 }

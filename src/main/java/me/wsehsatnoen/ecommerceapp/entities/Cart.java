@@ -1,9 +1,7 @@
 package me.wsehsatnoen.ecommerceapp.entities;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -18,14 +16,13 @@ import java.util.Set;
 @Getter
 @Setter
 @Table ( name = "carts" )
-@AllArgsConstructor
-@NoArgsConstructor
 public class Cart {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue( strategy = GenerationType.IDENTITY )
     @Column ( name = "cart_id" )
-    private Long id;
+    private int id; // When running the server, it appears that when the setId is not converting the cart id number from
+                     // from typescript to long in java, once I changed it to int, it works seamlessly
 
     @Column ( name = "order_tracking_number" )
     private String orderTrackingNumber;
