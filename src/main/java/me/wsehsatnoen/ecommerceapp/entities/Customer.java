@@ -67,6 +67,8 @@ public class Customer {
         }
     }
 
+
+    // constructor for bootstrap data
     public Customer(String firstName, String lastName, String address, String postal_code, String phone, Division division) {
         this.firstName = firstName;
         this.lastName = lastName;

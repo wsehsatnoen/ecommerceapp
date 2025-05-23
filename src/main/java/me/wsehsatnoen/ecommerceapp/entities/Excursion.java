@@ -50,7 +50,7 @@ public class Excursion {
     @ManyToMany
     @JoinTable ( name = "excursion_cartitem",
         joinColumns = @JoinColumn ( name = "excursion_id" ),
-        inverseJoinColumns = @JoinColumn ( name = "cart_item_id" ))
+        inverseJoinColumns = @JoinColumn ( name = "cart_item_id" ) )
     private Set<CartItem> cart_items;
 
 }
