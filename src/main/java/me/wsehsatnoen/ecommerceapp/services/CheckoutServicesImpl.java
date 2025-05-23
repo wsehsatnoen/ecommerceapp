@@ -1,6 +1,7 @@
 package me.wsehsatnoen.ecommerceapp.services;
 
 import jakarta.transaction.Transactional;
+import me.wsehsatnoen.ecommerceapp.dao.CartItemRepository;
 import me.wsehsatnoen.ecommerceapp.dao.CartRepository;
 import me.wsehsatnoen.ecommerceapp.dao.CustomerRepository;
 import me.wsehsatnoen.ecommerceapp.entities.Cart;
@@ -17,10 +18,12 @@ public class CheckoutServicesImpl implements CheckoutServices {
 
     private final CartRepository cartRepository;
     private final CustomerRepository customerRepository;
+    private final CartItemRepository cartItemRepository;
 
-    public CheckoutServicesImpl(CustomerRepository customerRepository, CartRepository cartRepository) {
+    public CheckoutServicesImpl(CustomerRepository customerRepository, CartRepository cartRepository, CartItemRepository cartItemRepository) {
         this.customerRepository = customerRepository;
         this.cartRepository = cartRepository;
+        this.cartItemRepository = cartItemRepository;
     }
 
     @Override
@@ -36,20 +39,20 @@ public class CheckoutServicesImpl implements CheckoutServices {
         cart.setOrderTrackingNumber(orderTrackingNumber);
 
         // populate order with cartItems
-        // todo create the functionality for cart items to save in database
         Set<CartItem> cartItems = purchaseData.getCartItems();
-        cartItems.forEach(cartItem -> {
-            cart.add(cartItem);
-        });
+        cartItems.forEach(cart::add);
 
         // populate customer with cart
         Customer customer = purchaseData.getCustomer();
         customer.add(cart);
 
+        // update cart status
+        cart.setStatus(StatusType.ordered);
+
         // save to the database
         customerRepository.save(customer);
-        cart.setStatus(StatusType.ordered);
         cartRepository.save(cart);
+        cartItemRepository.saveAll(cartItems);
 
         // return response
         return new PurchaseResponse(orderTrackingNumber);

@@ -26,8 +26,8 @@ public class CartItem {
     @Column ( name = "cart_item_id" )
     private Long id;
 
-    /// Unidirectional relationship, no need for Join column/Mapped by declarations
     @ManyToOne
+    @JoinColumn( name = "vacation_id" )
     private Vacation vacation;
 
     @ManyToMany
