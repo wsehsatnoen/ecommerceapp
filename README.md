@@ -1,31 +1,41 @@
 # ecommerceapp
 
-A Spring Boot backend for a vacation shop: customers browse vacation packages, add optional
-excursions, and check out. It exposes the data model as a REST (Representational State Transfer)
-API over MySQL, plus one hand-written checkout endpoint that turns a cart into a persisted order.
+The ecommerceapp is a Spring Boot backend for a vacation shop: customers browse vacation packages,
+add optional excursions, and check out. It exposes the data model as a REST (Representational State
+Transfer) API over MySQL, plus one hand-written checkout endpoint that turns a cart into a persisted
+order.
 
-This is a learning project. I built it to get hands-on with JPA (Jakarta Persistence API) relationship
-mapping and Spring Data REST rather than to run in production, and I've called out the shortcuts
-below instead of hiding them.
+This is a learning project. I built it to get hands-on experience with JPA (Jakarta Persistence API)
+relationship mapping and Spring Data REST, not to run in production. Thus, I have called out the
+shortcuts below instead of hiding them.
 
 ---
 
 ## Highlights
 
-- **Seven JPA entities with a full relational graph**, including a many-to-many join table
-  (`excursion_cartitem`) between cart items and excursions. Getting that relationship to actually
-  persist was the hardest part of the project and took several passes.
-- **Most of the API is generated, not written.** Seven repository interfaces extend `JpaRepository`
-  and Spring Data REST turns each one into a paginated HAL (Hypertext Application Language) resource
-  with full CRUD (Create, Read, Update, Delete) and navigable association links. There are no
-  hand-written controllers for those — the repository interfaces are literally one line each.
-- **One hand-written controller where the generated API wasn't enough.** Checkout has to assemble a
-  customer, a cart, and a set of cart items in a single transaction and hand back a tracking number,
-  which isn't something you can express as CRUD on a single resource. That's `POST /api/checkout/purchase`.
-- **Checkout is transactional and generates a UUID order tracking number** so the front end has
-  something to show the user immediately after purchase.
-- **Non-default Spring Data REST config**: entity IDs are exposed in JSON payloads (off by default),
-  and pagination is effectively disabled so the front end can pull whole collections in one request.
+There are five things worth pointing out before getting into the details.
+
+First, the project has seven JPA entities with a full relational graph, including a many-to-many
+join table (`excursion_cartitem`) between cart items and excursions. Getting that relationship to
+actually persist was the hardest part of the project and took several passes.
+
+Second, most of the API is generated rather than written. Seven repository interfaces extend
+`JpaRepository`, and Spring Data REST turns each one into a paginated HAL (Hypertext Application
+Language) resource with full CRUD (Create, Read, Update, Delete) and navigable association links.
+There are no hand-written controllers for those; the repository interfaces are literally one line
+each.
+
+Third, there is exactly one hand-written controller, for the one place the generated API was not
+enough. Checkout has to assemble a customer, a cart, and a set of cart items in a single transaction
+and hand back a tracking number, which is not something you can express as CRUD on a single
+resource. That is `POST /api/checkout/purchase`.
+
+Fourth, checkout is transactional and generates a UUID (Universally Unique Identifier) order
+tracking number, so the front end has something to show the user immediately after purchase.
+
+Finally, the Spring Data REST configuration is not the default. Entity IDs are exposed in JSON
+payloads (off by default), and pagination is effectively disabled so the front end can pull whole
+collections in one request.
 
 ---
 
@@ -41,21 +51,21 @@ below instead of hiding them.
 | Boilerplate | Lombok 1.18.36 |
 | Build | Maven (wrapper included) |
 
-There's no Spring Security, no Flyway/Liquibase, and no Docker setup — see
-[Limitations](#limitations-and-known-rough-edges).
+There is no Spring Security, no Flyway or Liquibase, and no Docker setup. See
+[Limitations](#limitations-and-known-rough-edges) for more on each.
 
 ---
 
 ## Running it
 
-### 1. Prerequisites
+Getting this running takes six steps, and the third one is the one that will take the most effort.
 
-- Java 17 (JDK)
-- MySQL 8 running on `localhost:3306`
+### Prerequisites
 
-Maven is not required — the repo includes the Maven wrapper (`./mvnw`).
+You will need Java 17 (the JDK, Java Development Kit) and MySQL 8 running on `localhost:3306`. Maven
+is not required, because the repo includes the Maven wrapper (`./mvnw`).
 
-### 2. Create the database and user
+### Create the database and user
 
 The app connects as user `ecommerceapp` to a schema named `full-stack-ecommerce`:
 
@@ -66,21 +76,20 @@ GRANT ALL PRIVILEGES ON `full-stack-ecommerce`.* TO 'ecommerceapp'@'localhost';
 FLUSH PRIVILEGES;
 ```
 
-### 3. Create the tables
+### Create the tables
 
-**The schema is not in this repo and the app will not create it for you.** `application.properties`
-sets `spring.jpa.hibernate.ddl-auto=none`, so Hibernate validates nothing and generates nothing —
-the tables have to exist before startup.
+**The schema is not in this repo, and the app will not create it for you.** `application.properties`
+sets `spring.jpa.hibernate.ddl-auto=none`, so Hibernate validates nothing and generates nothing. In
+other words, the tables have to exist before startup.
 
-You need these tables, matching the column names in `src/main/java/.../entities/`:
+You will need the following tables, matching the column names in `src/main/java/.../entities/`:
+`countries`, `divisions`, `customers`, `carts`, `cart_items`, `vacations`, `excursions`, and the join
+table `excursion_cartitem`.
 
-`countries`, `divisions`, `customers`, `carts`, `cart_items`, `vacations`, `excursions`, and the
-join table `excursion_cartitem`.
+The startup data loader also expects a row in `divisions` with `division_id = 42` (more on that in
+the startup step below), so seed `countries` and `divisions` before the first run.
 
-The startup data loader also expects a row in `divisions` with `division_id = 42` (see step 5), so
-seed `countries` and `divisions` before the first run.
-
-### 4. Adjust connection settings if needed
+### Adjust connection settings if needed
 
 Everything lives in `src/main/resources/application.properties`:
 
@@ -91,33 +100,35 @@ spring.datasource.password=ecommerceapp
 spring.data.rest.base-path=/api
 ```
 
-The credentials are committed in plain text. That's fine for a local learning project and wrong for
-anything real — see [Limitations](#limitations-and-known-rough-edges).
+The credentials are committed in plain text. That is fine for a local learning project and wrong for
+anything real (see [Limitations](#limitations-and-known-rough-edges)).
 
-### 5. Start it
+### Start it
 
 ```bash
 ./mvnw spring-boot:run
 ```
 
-The app starts on the default port **8080**, and the API is served under **`/api`**. Hit
-`http://localhost:8080/api` to get the HAL discovery document listing every exposed resource.
+The app will start on the default port **8080**, and the API is served under **`/api`**. Hitting
+`http://localhost:8080/api` will return the HAL discovery document listing every exposed resource.
 
-On every startup, `BootStrapData` (a `CommandLineRunner`) inserts five hardcoded customers. It
-inserts them again on each restart — it has no "already seeded" check — so expect duplicates if you
-restart repeatedly.
+On every startup, `BootStrapData` (a `CommandLineRunner`) inserts five hardcoded customers. Because
+it has no "already seeded" check, it will insert them again on each restart, so expect duplicates if
+you restart repeatedly.
 
-### 6. Front end
+### Front end
 
-This is backend-only. It was built to serve an Angular app running on `http://localhost:4200`
-(that's the origin allowed by the CORS config on the checkout controller), and that app is not part
-of this repo.
+This is backend only. It was built to serve an Angular app running on `http://localhost:4200`, which
+is the one origin allowed by the CORS (Cross-Origin Resource Sharing) configuration on the checkout
+controller. That app is not part of this repo.
 
 ---
 
 ## Technical walkthrough
 
 ### Domain model
+
+The domain model is seven entities, related as shown below:
 
 ```
 Country 1──* Division 1──* Customer 1──* Cart 1──* CartItem *──1 Vacation
@@ -127,54 +138,59 @@ Country 1──* Division 1──* Customer 1──* Cart 1──* CartItem *─
                                                           Excursion
 ```
 
-- **Vacation** — a vacation package: title, description, `travel_fare_price`, image URL.
-- **Excursion** — an optional add-on belonging to exactly one vacation: title, price, image URL.
-  So a vacation owns a list of excursions, and you can only pick excursions offered by the vacation
-  you're buying.
-- **CartItem** — one vacation in a cart, plus the set of excursions chosen for it. The
-  vacation-to-cart-item link is many-to-one; the excursion-to-cart-item link is many-to-many through
-  `excursion_cartitem`, because the same excursion can appear in many different people's cart items.
-- **Cart** — the order itself: `order_tracking_number`, `package_price`, `party_size`, and a
-  `status` enum (`pending`, `ordered`, `canceled`) persisted as a string via `@Enumerated(EnumType.STRING)`
-  rather than as an ordinal int, so the values stay readable in the database and don't break if I
-  reorder the enum.
-- **Customer** — name, address, postal code, phone, and a link to a Division.
-- **Country / Division** — location reference data (e.g. country → state/province), used to
-  normalize customer addresses instead of storing free-text location strings on the customer.
+A **Vacation** is a vacation package with a title, description, `travel_fare_price`, and image URL.
+An **Excursion** is an optional add-on that belongs to exactly one vacation, with its own title,
+price, and image URL. In other words, a vacation owns a list of excursions, and you can only pick
+excursions offered by the vacation you are buying.
+
+A **CartItem** is one vacation in a cart, plus the set of excursions chosen for it. The
+vacation-to-cart-item link is many-to-one. However, the excursion-to-cart-item link is many-to-many
+through `excursion_cartitem`, because the same excursion can appear in many different people's cart
+items.
+
+A **Cart** is the order itself: `order_tracking_number`, `package_price`, `party_size`, and a
+`status` enum (`pending`, `ordered`, `canceled`). The status is persisted as a string via
+`@Enumerated(EnumType.STRING)` instead of as an ordinal int. This will keep the values readable in
+the database, and they will not break if I reorder the enum.
+
+A **Customer** holds a name, address, postal code, phone, and a link to a Division. **Country** and
+**Division** are location reference data (i.e., country, then state or province), used to normalize
+customer addresses instead of storing free-text location strings on the customer.
 
 Every entity carries `create_date` and `last_update` columns managed by Hibernate's
-`@CreationTimestamp` and `@UpdateTimestamp`, so I never set audit timestamps by hand.
-
-Lombok's `@Getter`/`@Setter`/`@NoArgsConstructor`/`@AllArgsConstructor` handle the boilerplate. JPA
+`@CreationTimestamp` and `@UpdateTimestamp`, so I never set audit timestamps by hand. Lombok's
+`@Getter`, `@Setter`, `@NoArgsConstructor`, and `@AllArgsConstructor` handle the boilerplate. JPA
 requires a no-arg constructor, which is why `@NoArgsConstructor` is on most entities.
 
 ### Why Spring Data REST instead of hand-written controllers
 
 The front end needed plain CRUD over seven tables. Writing seven `@RestController` classes with five
-methods each would have been ~35 methods of identical delegate-to-repository code, and every one of
-them is a place to introduce a typo.
+methods each would have been roughly 35 methods of identical delegate-to-repository code, and every
+one of them is a place to introduce a typo.
 
 Spring Data REST reads the repository interfaces and generates the HTTP layer at runtime, including
-association subresources — so `GET /api/vacations/1/excursions` works without me writing anything.
-The entire persistence + API layer for a table is:
+association subresources. Thus, `GET /api/vacations/1/excursions` works without me writing anything.
+The entire persistence and API layer for a table is this:
 
 ```java
 @CrossOrigin
 public interface VacationRepository extends JpaRepository<Vacation, Long> {}
 ```
 
-The tradeoff is real: the API shape is the database shape. There's no DTO (Data Transfer Object)
-layer, so entity fields are the JSON contract and a column rename is a breaking API change. There's
-also nowhere to put business rules — which is exactly why checkout had to be written by hand.
-For a project this size I'd make the same call again; for anything with real business logic I'd want
-explicit controllers and DTOs.
+Unfortunately, the trade-off is real. Because there is no DTO (Data Transfer Object) layer, the API
+shape is the database shape: entity fields are the JSON contract, and a column rename is a breaking
+API change. There is also nowhere to put business rules, which is exactly why checkout had to be
+written by hand. For a project this size, I would make the same call again. However, for anything
+with real business logic, I would want explicit controllers and DTOs.
 
 ### Why MySQL
 
-The schema is genuinely relational — five foreign key relationships and a join table — and orders
-need to be written atomically, so a relational database with transactions was the right fit. MySQL
-specifically because it's what I was set up with locally; nothing here is MySQL-specific beyond the
-dialect and driver, so Postgres would be a driver swap and a dialect change.
+The schema is genuinely relational, with five foreign key relationships and a join table, and orders
+need to be written atomically. Thus, a relational database with transactions was the right fit.
+
+I chose MySQL specifically because it is what I was set up with locally (not the most scientific
+selection process). Nothing here is MySQL-specific beyond the dialect and driver, so moving to
+Postgres would simply be a driver swap and a dialect change.
 
 ### Spring Data REST configuration
 
@@ -190,14 +206,15 @@ config.setDefaultPageSize(Integer.MAX_VALUE);
 config.setMaxPageSize(Integer.MAX_VALUE);
 ```
 
-- **`exposeIdsFor(...)`** — by default Spring Data REST hides primary keys and expects clients to
-  navigate by HAL link. The front end needed the numeric IDs in the JSON body, so I opted those five
-  entities in. Note `Cart` and `CartItem` are deliberately not in that list: those are written
-  through checkout, not read by ID.
-- **Pagination disabled** — the front end wanted full lists (all vacations, all excursions, all
-  countries) in one call rather than paging. Setting the page size to `Integer.MAX_VALUE` is the
-  blunt way to do that. It's fine at reference-data scale and would fall over on a real `carts`
-  table; proper pagination is the correct fix.
+The first change is `exposeIdsFor(...)`. By default, Spring Data REST hides primary keys and expects
+clients to navigate by HAL link. However, the front end needed the numeric IDs in the JSON body, so
+I opted those five entities in. You will note that `Cart` and `CartItem` are deliberately not in that
+list, because those are written through checkout, not read by ID.
+
+The second change disables pagination. The front end wanted full lists (all vacations, all
+excursions, all countries) in one call rather than paging through them, and setting the page size to
+`Integer.MAX_VALUE` is the blunt way to do that. It is fine at reference-data scale; however, it
+would fall over on a real `carts` table, and proper pagination is the correct fix.
 
 ### Endpoints
 
@@ -214,7 +231,7 @@ Spring Data REST exposes each repository under the `/api` base path, pluralized 
 | `/api/cartItems` | GET, POST, PUT, PATCH, DELETE |
 
 Each collection also supports `/api/{resource}/{id}` and association subresources for the entity's
-relationships, for example:
+relationships. A few examples:
 
 ```
 GET /api/vacations/1/excursions     excursions offered by a vacation
@@ -224,11 +241,12 @@ GET /api/cartItems/1/excursions     excursions chosen for a cart item
 GET /api/divisions/1/country        the country a division belongs to
 ```
 
-`GET /api/profile` is the entry point to the generated ALPS (Application-Level Profile Semantics) metadata, with per-resource descriptors at `/api/profile/{resource}`.
+`GET /api/profile` is the entry point to the generated ALPS (Application-Level Profile Semantics)
+metadata, with per-resource descriptors at `/api/profile/{resource}`.
 
-Because every repository is annotated with a bare `@CrossOrigin`, these endpoints accept
-cross-origin requests from **any** origin. That was convenience during development, not a decision
-I'd ship.
+Because every repository is annotated with a bare `@CrossOrigin`, these endpoints will accept
+cross-origin requests from **any** origin. That was a convenience during development, not a decision
+I would ship.
 
 ### The one hand-written endpoint: checkout
 
@@ -236,29 +254,42 @@ I'd ship.
 POST /api/checkout/purchase
 ```
 
-Request body (`PurchaseData`): a `customer`, a `cart`, and a set of `cartItems`.
-Response (`PurchaseResponse`): `{ "orderTrackingNumber": "<uuid>" }`.
+The request body (`PurchaseData`) contains a `customer`, a `cart`, and a set of `cartItems`. The
+response (`PurchaseResponse`) is simply `{ "orderTrackingNumber": "<uuid>" }`.
 
-`CheckoutServicesImpl.checkout()` is annotated `@Transactional` and does the following in order:
+Here is where things were a little complicated. `CheckoutServicesImpl.checkout()` is annotated
+`@Transactional` and runs in five parts: first, it nulls out the incoming cart ID, generates a
+tracking number, wires up both sides of the relationships, sets the cart status, then saves
+everything in parent-to-child order. A few of those need explaining.
 
-1. **Null out the incoming cart ID.** The Angular front end sends `id: 0` for a new cart, which JPA
-   would interpret as "update cart 0" rather than "insert." Setting it to `null` forces MySQL's
-   `AUTO_INCREMENT` to assign a real one. This is commented inline in the code because it's the kind
-   of thing that looks like a mistake six months later.
-2. **Generate a tracking number** — `UUID.randomUUID().toString()`, set on the cart.
-3. **Wire up both sides of the relationships.** `Cart.add(CartItem)` and `Customer.add(Cart)` are
-   helper methods on the entities that set the child's back-reference at the same time they add to
-   the parent's collection. Skipping that back-reference is what caused the foreign keys to come out
-   null the first time I wrote this.
-4. **Set the cart status to `ordered`.**
-5. **Save customer, then cart, then all cart items**, in that order, so parent rows exist before the
-   children that reference them.
+Nulling out the cart ID is necessary because the Angular front end sends `id: 0` for a new cart,
+which JPA would interpret as "update cart 0" rather than "insert." Setting it to `null` forces
+MySQL's `AUTO_INCREMENT` to assign a real one. This is commented inline in the code, because it is
+the kind of thing that looks like a mistake six months later.
 
-The whole thing is one transaction, so a failure partway through doesn't leave an order half-written.
+The tracking number is simply `UUID.randomUUID().toString()`, set on the cart.
+
+Wiring the relationships is where the first version went wrong. `Cart.add(CartItem)` and
+`Customer.add(Cart)` are helper methods on the entities that set the child's back-reference at the
+same time they add to the parent's collection. Skipping that back-reference is what caused the
+foreign keys to come out null the first time I wrote this.
+
+After that, the cart status is set to `ordered`, and the customer, cart, and cart items are saved in
+that order. Parent rows have to exist before the children that reference them, the same way a
+shipment has to exist in the system before parcels can be assigned to it. Because the whole thing is
+one transaction, a failure partway through will not leave an order half-written.
+
+To address the elephant in the room, why not just POST the customer, cart, and cart items through
+the generated endpoints and skip the controller entirely? This will simply not work, because those
+would be three separate requests and three separate transactions. If the last one failed, the
+database would be left holding a customer and a cart with nothing in it, and there would still be
+nowhere to generate the tracking number. Thus, checkout needs one endpoint that owns the whole
+transaction.
 
 `CheckoutServices` is an interface with a single implementation, and `CheckoutController` takes it
-via constructor injection. That's more indirection than a project this size needs, but it keeps the
-controller unaware of the persistence code.
+via constructor injection. That is more indirection than a project this size needs (an interface
+with exactly one implementation is admittedly a bit ceremonial), but it keeps the controller unaware
+of the persistence code.
 
 Unlike the repositories, the checkout controller restricts CORS to a single origin:
 `@CrossOrigin("http://localhost:4200")`.
@@ -267,40 +298,58 @@ Unlike the repositories, the checkout controller restricts CORS to a single orig
 
 ## Limitations and known rough edges
 
-Being straight about what's not done here:
+There is a fair amount that is not done here, and I would rather state it plainly than have someone
+find it. The known issues fall into five groups: setup, security, input handling, entity mapping,
+and testing.
 
-- **No schema in the repo.** `ddl-auto=none` with no `schema.sql` and no migration tool means you
-  can't clone this and run it — you have to reconstruct the tables from the entity classes. Adding
-  Flyway is the single highest-value fix.
-- **Database credentials are committed** in `application.properties` instead of coming from
-  environment variables or a secrets store.
-- **No authentication or authorization.** Spring Security isn't on the classpath, so every endpoint,
-  including `DELETE /api/customers/1`, is open to anyone who can reach the port.
-- **No request validation.** `Customer` has `nullable = false, length = 50` column constraints,
-  which are database-level, not application-level. There's no Bean Validation
-  (`@NotBlank`, `@Size`) and no `spring-boot-starter-validation`, so bad input fails as a database
-  error rather than a clean 400.
-- **No error handling on checkout.** There's no `@ControllerAdvice` and no validation of the
-  purchase payload, so a malformed request surfaces as a stack trace.
-- **The seed data loader is not idempotent** and hardcodes `division_id = 42`. It duplicates five
-  customers on every restart and throws if division 42 doesn't exist. It should be behind a Spring
-  profile at minimum.
-- **`Division` maps `country_id` twice** — once as a read-only `@ManyToOne` association
-  (`insertable = false, updatable = false`) and once as a raw `Long` column. Relatedly,
-  `Country.divisions` uses `mappedBy = "country_id"`, pointing at that raw column rather than at the
-  `country` association. It works for the reads the front end does, but it's not how the mapping
-  should be expressed and it's on my list to clean up.
-- **Both sides of the CartItem↔Excursion many-to-many declare `@JoinTable`** on `excursion_cartitem`
-  instead of one side using `mappedBy`. That means neither side is the inverse side and Hibernate
-  can attempt to write the same join row from both directions.
-- **Cart totals are not calculated server-side.** `package_price` is whatever the client sends,
-  which means the client decides the price. Real checkout would recompute it from the vacation and
-  excursion prices on the server.
-- **Tests are effectively absent.** `EcommerceappApplicationTests` only asserts that the Spring
-  context loads, and even that needs a live MySQL instance. Checkout — the only real logic in the
-  project — has no test coverage.
+The biggest setup issue is that there is no schema in the repo. With `ddl-auto=none`, no
+`schema.sql`, and no migration tool, you cannot clone this and run it; you have to reconstruct the
+tables from the entity classes. Adding Flyway is the single highest-value fix.
+
+Relatedly, the seed data loader is not idempotent and hardcodes `division_id = 42`. It will
+duplicate five customers on every restart and throw if division 42 does not exist. At minimum, it
+should be behind a Spring profile.
+
+In terms of security, the database credentials are committed in `application.properties` instead of
+coming from environment variables or a secrets store. On top of that, there is no authentication or
+authorization. Spring Security is not on the classpath, so every endpoint, including
+`DELETE /api/customers/1`, is open to anyone who can reach the port.
+
+Input handling has three gaps. First, there is no request validation. `Customer` has
+`nullable = false, length = 50` column constraints, but those are database-level, not
+application-level. Because there is no Bean Validation (`@NotBlank`, `@Size`) and no
+`spring-boot-starter-validation`, bad input fails as a database error rather than a clean 400.
+
+Second, checkout has no error handling. There is no `@ControllerAdvice` and no validation of the
+purchase payload, so a malformed request will surface as a stack trace.
+
+Third, cart totals are not calculated server-side. `package_price` is whatever the client sends,
+which means the client decides the price (the equivalent of letting the customer write their own
+receipt). Real checkout would recompute it from the vacation and excursion prices on the server.
+
+The entity mapping has two problems. `Division` maps `country_id` twice: once as a read-only
+`@ManyToOne` association (`insertable = false, updatable = false`) and once as a raw `Long` column.
+Relatedly, `Country.divisions` uses `mappedBy = "country_id"`, pointing at that raw column rather
+than at the `country` association. It works for the reads the front end does, but it is not how the
+mapping should be expressed, and it is on my list to clean up.
+
+Both sides of the CartItem to Excursion many-to-many also declare `@JoinTable` on
+`excursion_cartitem` instead of one side using `mappedBy`. In other words, neither side is the
+inverse side, and Hibernate can attempt to write the same join row from both directions.
+
+Finally, tests are effectively absent. `EcommerceappApplicationTests` only asserts that the Spring
+context loads, and even that needs a live MySQL instance. Checkout, the only real logic in the
+project, has no test coverage.
+
+Overall, the project does what it was built to do, which was to teach me how JPA relationships and
+Spring Data REST behave in practice. However, it is not something I would deploy as is, and Flyway
+would be the first thing added.
+
+---
 
 ## Project layout
+
+The source is laid out as follows:
 
 ```
 src/main/java/me/wsehsatnoen/ecommerceapp/
